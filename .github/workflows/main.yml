@@ -1,59 +1,38 @@
 name: Build and Deploy to GitHub Pages
 
-# 1) Run on every push to main
+# 1) Trigger on every push to the 'main' branch
 on:
   push:
     branches:
       - main
 
-# 2) Grant Pages permissions so the deploy step can push to gh-pages
+# 2) Grant the GITHUB_TOKEN permission to update Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read   # needed to check out source code
+  pages: write     # needed to push to gh-pages
+  id-token: write  # needed by the deploy-pages action
 
 jobs:
   build:
-    name: Build React app
+    name: Build React App
     runs-on: ubuntu-latest
 
     steps:
-      # 2.1 Checkout your source
+      # ──────────────────────────────────────────────────────────────
+      # 2.1 Checkout your repository (reads from main)
       - name: Check out source code
         uses: actions/checkout@v4
 
-      # 2.2 Use Node.js 18.x
+      # ──────────────────────────────────────────────────────────────
+      # 2.2 Set up Node.js 18.x
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 2.3 Install dependencies
+      # ──────────────────────────────────────────────────────────────
+      # 2.3 Install all dependencies (reads package.json / yarn.lock)
       - name: Install dependencies
         run: npm install
 
-      # 2.4 Build the React app
-      - name: Build React app
-        run: npm run build
-
-      # 2.5 Upload the build folder as an artifact
-      - name: Upload build output as artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./build
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      # 3.1 Download exactly that same build artifact
-      - name: Download build artifact
-        uses: actions/download-pages-artifact@v2
-
-      # 3.2 Push it into gh-pages so GitHub Pages can serve it
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # ───────────
