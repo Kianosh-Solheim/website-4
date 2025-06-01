@@ -1,24 +1,20 @@
 name: Build and Deploy to GitHub Pages
 
-# 1) Whenever you push to main, trigger this workflow
 on:
   push:
     branches:
       - main
 
 permissions:
-  contents: read           # allow checkout to read source code
-  pages: write             # allow deploy-pages to push to gh-pages
-  id-token: write          # needed for pages deployment
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
-    name: Build (npm run build)
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out source code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
@@ -37,10 +33,8 @@ jobs:
           path: ./build
 
   deploy:
-    name: Deploy / Publish to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-
     steps:
       - name: Download build artifact
         uses: actions/download-pages-artifact@v2
@@ -48,8 +42,4 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
         with:
-          # By default, this will push to gh-pages branch
-          # and GitHub Pages will serve from it, as long as you
-          # have set Source=gh-pages in your repo’s Pages settings.
-          # No need to supply a PAT; the built-in GITHUB_TOKEN is used.
           token: ${{ secrets.GITHUB_TOKEN }}
