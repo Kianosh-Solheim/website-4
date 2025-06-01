@@ -1,20 +1,23 @@
-name: Deploy React App to GitHub Pages
+name: Build and Deploy to GitHub Pages
 
-# Give this workflow write access to repo contents so GH-Pages can push
-permissions:
-  contents: write
-
+# 1) Whenever you push to main, trigger this workflow
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: read           # allow checkout to read source code
+  pages: write             # allow deploy-pages to push to gh-pages
+  id-token: write          # needed for pages deployment
+
 jobs:
-  build-and-deploy:
+  build:
+    name: Build (npm run build)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the repository
+      - name: Check out source code
         uses: actions/checkout@v4
 
       - name: Use Node.js 18.x
@@ -25,13 +28,28 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build the React app
+      - name: Build React app
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload build output as artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
-          publish_branch: gh-pages
-          # (other optional settings…)
+          path: ./build
+
+  deploy:
+    name: Deploy / Publish to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-pages-artifact@v2
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+        with:
+          # By default, this will push to gh-pages branch
+          # and GitHub Pages will serve from it, as long as you
+          # have set Source=gh-pages in your repo’s Pages settings.
+          # No need to supply a PAT; the built-in GITHUB_TOKEN is used.
+          token: ${{ secrets.GITHUB_TOKEN }}
