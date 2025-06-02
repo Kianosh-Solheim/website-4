@@ -2,8 +2,7 @@
   "name": "website-4",
   "version": "0.1.0",
   "private": true,
-- "homepage": "https://github.com/Kianosh-Solheim/website-4",
-+ "homepage": "https://kianosh-solheim.github.io/website-4",
+  "homepage": "https://kianosh-solheim.github.io/website-4",
   "dependencies": {
     "firebase": "^9.0.0",
     "react": "^18.0.0",
